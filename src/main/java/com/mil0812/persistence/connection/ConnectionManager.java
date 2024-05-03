@@ -1,23 +1,29 @@
-package com.mil0812.persistence.database;
+package com.mil0812.persistence.connection;
 
-
+import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Клас, що відповідає за підключення до бази даних
  */
 public class ConnectionManager {
 
-   static Logger logger = Logger.getLogger(ConnectionManager.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
+
 
   public static void connect() {
     try (Connection connection = SQLiteConnector.getConnection();

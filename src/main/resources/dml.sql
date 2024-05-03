@@ -1,3 +1,15 @@
+/*DELETE FROM user;
+DELETE FROM teacher;
+DELETE FROM student;
+DELETE FROM test;
+DELETE FROM student_test;
+DELETE FROM section;
+DELETE FROM question_type;
+DELETE FROM question;
+DELETE FROM answer;
+DELETE FROM result;*/
+
+
 --Заповнення даними таблиці "Користувач"
 INSERT INTO user(login, password, status) VALUES
 ('lollipop321', 'lily098', 'student'),
@@ -11,9 +23,9 @@ INSERT INTO teacher(first_name, last_name, patronymic, email, user_id) VALUES
 ('Аделія', 'Хоуп', 'Вікторівна', 'suunnyyy@gmail.com', 4);
 
 --Заповнення даними таблиці "Учень"
-INSERT INTO  student(first_name, last_name, grade, user_id) VALUES
-('Міа', 'Лейм', 11, 2),
-('Фанні', 'Марвен', 11, 1);
+INSERT INTO  student(first_name, last_name, date_of_birth, user_id) VALUES
+('Міа', 'Лейм', '2003-02-03', 2),
+('Фанні', 'Марвен', '2005-11-15', 1);
 
 --Заповнення даними таблиці "Розділи"
 INSERT INTO section(name, description) VALUES

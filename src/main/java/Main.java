@@ -1,11 +1,12 @@
-import com.mil0812.persistence.database.ConnectionManager;
-import com.mil0812.persistence.database.SQLiteConnector;
+import com.mil0812.persistence.connection.ConnectionManager;
+import com.mil0812.persistence.connection.SQLiteConnector;
 import java.sql.Connection;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
 
-  static Logger logger = Logger.getLogger(Main.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
 
   public static void main(String[] args) {

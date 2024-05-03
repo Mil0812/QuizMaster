@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS student
     id         INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     first_name VARCHAR(30)                       NOT NULL,
     last_name  VARCHAR(30)                       NOT NULL,
-    grade      INT,
+    date_of_birth      DATE,
     user_id    INTEGER,
     FOREIGN KEY (user_id)
         REFERENCES user (id)
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS section
 CREATE TABLE IF NOT EXISTS question
 (
     id            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    type_id          VARCHAR(30),
+    type_id       INT,
     image         BLOB,
     question_text VARCHAR(100)                      NOT NULL,
     test_id       INTEGER,

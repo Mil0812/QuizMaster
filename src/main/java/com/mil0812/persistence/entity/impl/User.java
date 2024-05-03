@@ -1,18 +1,19 @@
 package com.mil0812.persistence.entity.impl;
 
-public class User {
-  public enum Status{
-    TEACHER("teacher"),
-    STUDENT("student");
+import com.mil0812.persistence.entity.Entity;
+import java.util.UUID;
 
-    String name;
-    Status(String name){
-      this.name = name;
-    }
+public record User(UUID id, String login, String password, String status)
+implements Entity, Comparable<User> {
 
-    public String getName() {
-      return name;
-    }
+  //за чим сортує
+  @Override
+  public int compareTo(User u) {
+    return this.login.compareTo(u.login);
   }
 
+  public enum Status{
+    TEACHER,
+    STUDENT;
+  }
 }
