@@ -1,6 +1,5 @@
 package com.mil0812.persistence.unitOfWork.factory;
 
-import com.mil0812.persistence.unitOfWork.UserUnitOfWork;
 import org.springframework.stereotype.Component;
 
 /**

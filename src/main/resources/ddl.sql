@@ -1,10 +1,20 @@
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS student;
+DROP TABLE IF EXISTS teacher;
+DROP TABLE IF EXISTS section;
+DROP TABLE IF EXISTS question;
+DROP TABLE IF EXISTS question_type;
+DROP TABLE IF EXISTS answer;
+DROP TABLE IF EXISTS result;
+DROP TABLE IF EXISTS student_test;
+
 ---Табличка "Користувач"
 ---3 NF
     CREATE TABLE IF NOT EXISTS user
     (
-        id       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        login    VARCHAR(20)                       NOT NULL,
-        password VARCHAR(20)                       NOT NULL,
+        id       UUID PRIMARY KEY,
+        login    VARCHAR(20)                       NOT NULL UNIQUE,
+        password VARCHAR(20)                       NOT NULL UNIQUE,
         status   VARCHAR(7)                        NOT NULL,
         CHECK (status IN ('teacher', 'student'))
     );
