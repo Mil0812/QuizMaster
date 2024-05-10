@@ -1,4 +1,4 @@
-/*
+
 package com.mil0812.persistence.repository;
 
 import static java.lang.StringTemplate.STR;
@@ -83,7 +83,6 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
       while (resultSet.next()) {
         entities.add(rowMapper.mapRow(resultSet));
       }
-      // LOGGER.info("found all users - [%s]".formatted(users));
       return entities;
     } catch (SQLException throwables) {
       throw new EntityNotFound(
@@ -105,7 +104,6 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
       while (resultSet.next()) {
         entities.add(rowMapper.mapRow(resultSet));
       }
-      // LOGGER.info("found all users - [%s]".formatted(users));
       return entities;
     } catch (SQLException throwables) {
       throw new EntityNotFound(
@@ -145,10 +143,10 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
             placeholders})
         """;
 
-    if (attributes.stream().anyMatch(a -> a.equals("created_at"))) {
+    /*if (attributes.stream().anyMatch(a -> a.equals("created_at"))) {
       values.add(LocalDateTime.now()); // created_at
       values.add(LocalDateTime.now()); // updated_at
-    }
+    }*/
 
     return updateExecute(values, sql, "Помилка при додаванні нового запису в таблицю");
   }
@@ -156,7 +154,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
     List<String> attributes = tableAttributes();
     String attributesString =
         attributes.stream()
-            .filter(a -> !a.contains("created_at"))
+            .filter(a -> !a.contains("date_of_test"))
             .map(a -> STR."\{a} = ?")
             .collect(Collectors.joining(", "));
     String sql =
@@ -166,9 +164,9 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
                        WHERE id = ?
                     """;
 
-    if (attributes.stream().anyMatch(a -> a.equals("updated_at"))) {
+ /*   if (attributes.stream().anyMatch(a -> a.equals("updated_at"))) {
       values.add(LocalDateTime.now()); // updated_at
-    }
+    }*/
 
     return updateExecute(values, sql, "Помилка при оновленні існуючого запису в таблиці");
   }
@@ -188,7 +186,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
       UUID id = (UUID) values.stream()
           .filter(UUID.class::isInstance)
           .findFirst()
-          .orElseThrow(() -> new NoSuchElementException("UUID not found"));
+          .orElseThrow(() -> new NoSuchElementException("UUID не знайдено"));
 
       return findById(id).orElseThrow();
     } catch (SQLException | NoSuchElementException e) {
@@ -234,12 +232,12 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
             placeholders})
         """;
 
-    if (attributes.stream().anyMatch(a -> a.equals("created_at"))) {
+  /*  if (attributes.stream().anyMatch(a -> a.equals("created_at"))) {
       listOfValues.forEach(values -> {
         values.add(LocalDateTime.now()); // created_at
         values.add(LocalDateTime.now()); // updated_at
       });
-    }
+    }*/
 
     return batchExecute(listOfValues, sql, "Помилка при додаванні нового запису в таблицю");
   }
@@ -257,11 +255,11 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
                        WHERE id = ?
                     """;
 
-    if (attributes.stream().anyMatch(a -> a.equals("updated_at"))) {
+   /* if (attributes.stream().anyMatch(a -> a.equals("updated_at"))) {
       listOfValues.forEach(values -> {
         values.add(LocalDateTime.now()); // updated_at
       });
-    }
+    }*/
 
     return batchExecute(listOfValues, sql, "Помилка при оновленні існуючого запису в таблиці");
   }
@@ -292,7 +290,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
       UUID id = (UUID) values.stream()
           .filter(UUID.class::isInstance)
           .findFirst()
-          .orElseThrow(() -> new NoSuchElementException("UUID not found"));
+          .orElseThrow(() -> new NoSuchElementException("UUID не знайдено"));
 
       return STR."'\{id.toString()}'";
     }).toList();
@@ -347,4 +345,4 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
 
   protected abstract List<Object> tableValues(T entity);
 
-}*/
+}
