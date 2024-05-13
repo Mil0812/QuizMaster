@@ -8,28 +8,22 @@ import com.mil0812.persistence.repository.interfaces.TableTitles;
 import com.mil0812.persistence.repository.mappers.RowMapper;
 import com.mil0812.persistence.repository.mappers.impl.ResultRowMapper;
 import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class ResultRepositoryImpl extends GenericJdbcRepository<Result>
-implements ResultRepository {
+    implements ResultRepository {
 
   public ResultRepositoryImpl(ConnectionManager connectionManager,
       ResultRowMapper resultRowMapper) {
     super(connectionManager, resultRowMapper, TableTitles.RESULT.getName());
-  }
-
-  @Override
-  protected List<String> tableAttributes() {
-    return List.of("user", "test_id", "test_type", "section_id", "date_of_test", "grade");
-  }
-
-  @Override
-  protected List<Object> tableValues(Result entity) {
-    return null;
   }
 
   @Override
@@ -45,5 +39,25 @@ implements ResultRepository {
   @Override
   public Optional<Result> findByDate(Timestamp date) {
     return findBy("date_of_test", date);
+  }
+
+  @Override
+  protected Map<String, Object> tableValues(Result result) {
+    Map<String, Object> values = new LinkedHashMap<>();
+
+    if (Objects.nonNull(result.userId())) {
+      values.put("user_id", result.userId());
+    }
+    if (Objects.nonNull(result.testId())) {
+      values.put("test_id", result.userId());
+    }
+    if (Objects.nonNull(result.sectionId())) {
+      values.put("section_id", result.sectionId());
+    }
+    values.put("grade", result.grade());
+    values.put("date_of_test",
+        result.dateOfTest().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+
+    return values;
   }
 }

@@ -1,14 +1,16 @@
-DELETE FROM user;
+/*
 DELETE FROM test;
+DELETE FROM test_type;
 DELETE FROM section;
 DELETE FROM question;
 DELETE FROM answer;
-DELETE FROM result;
+DELETE FROM user;
+*/
 
 
 --Заповнення даними таблиці "Користувач"
 INSERT INTO user(id, login, password, firstName, lastName, email, status) VALUES
-('ce66389c-ab6e-42d8-aa79-b6b9abf41cdb', 'lollipop321', 'lily098', 'Фанні', 'Марвен', 'lollipop00@i.ua', 'student'),
+('ce66389c-ab6e-42d8-aa79-b6b9abf41cdb', 'lollipop321', 'lily098', 'Фанні', 'Марвен', 'lollipop@i.ua', 'student'),
 ('93966090-3acc-41c2-a88c-1808fbcb60a1', 'millenium', 'Mmm7', 'Міа', 'Лейм', 'mia-leim1@gmail.com', 'student'),
 ('3b5a1d93-6a0b-42c1-b1c8-25caedec9fe9', 'waX99', 'Wax00', 'Мелорі', 'Джонсон', 'wax@i.ua', 'teacher'),
 ('e969b133-c007-419b-bd64-3fbba78ecb2d', 'sunny', '777', 'Аделія', 'Хоуп', 'suunnyyy@gmail.com', 'teacher');

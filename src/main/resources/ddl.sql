@@ -9,28 +9,28 @@ DROP TABLE IF EXISTS section_test;
 
 ---Табличка "Користувач"
 ---3 NF
-    CREATE TABLE IF NOT EXISTS user
-    (
-        id        UUID PRIMARY KEY,
-        login     VARCHAR(20) NOT NULL UNIQUE,
-        password  VARCHAR(20) NOT NULL,
-        firstName VARCHAR(30) NOT NULL,
-        lastName  VARCHAR(30) NOT NULL,
-        email     VARCHAR(78) NOT NULL UNIQUE,
-        status    VARCHAR(7)  NOT NULL,
-        CHECK (status IN ('teacher', 'student')),
-        CONSTRAINT users_login_key UNIQUE (login),
-        CONSTRAINT users_email_key UNIQUE (email),
-        CONSTRAINT users_login_min_length_check CHECK (LENGTH(login) >= 5)
-    );
+CREATE TABLE IF NOT EXISTS user
+(
+    id        UUID PRIMARY KEY,
+    login     VARCHAR(20)  NOT NULL UNIQUE,
+    password  VARCHAR(20)  NOT NULL,
+    firstName VARCHAR(30)  NOT NULL,
+    lastName  VARCHAR(30)  NOT NULL,
+    email     VARCHAR(111) NOT NULL UNIQUE,
+    status    VARCHAR(7)   NOT NULL,
+    CHECK (status IN ('teacher', 'student')),
+    CONSTRAINT users_login_key UNIQUE (login),
+    CONSTRAINT users_email_key UNIQUE (email),
+    CONSTRAINT users_login_min_length_check CHECK (LENGTH(login) >= 5)
+);
 
 ---Табличка "Розділ"
 ---2 NF
 CREATE TABLE IF NOT EXISTS section
 (
-    id          UUID PRIMARY KEY,
-    name        VARCHAR(30) NOT NULL,
-    CONSTRAINT section_name_key UNIQUE(name)
+    id   UUID PRIMARY KEY,
+    name VARCHAR(30) NOT NULL,
+    CONSTRAINT section_name_key UNIQUE (name)
 );
 
 ---Табличка "Тест"
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS test
     author_id      UUID        NULL,
     type_id        UUID        NOT NULL,
     title          VARCHAR(40) NOT NULL,
-    image          BLOB        NULL,
+    image          VARCHAR(30) NULL,
     question_count INT         NULL,
     CONSTRAINT tests_title_key UNIQUE (title),
     CONSTRAINT tests_section_id_fk FOREIGN KEY (section_id) REFERENCES section (id)
@@ -64,10 +64,10 @@ CREATE TABLE IF NOT EXISTS test_type
     name                 VARCHAR(40)  NOT NULL,
     description          VARCHAR(130) NOT NULL,
     title                VARCHAR(40)  NULL,
-    image                BYTEA         NULL,
+    image                VARCHAR(30)  NULL,
     max_answer_count     INT          NOT NULL,
     correct_answer_count INT          NOT NULL,
-    CONSTRAINT correct_answer_count CHECK (max_answer_count>=test_type.correct_answer_count),
+    CONSTRAINT correct_answer_count CHECK (max_answer_count >= test_type.correct_answer_count),
     CONSTRAINT test_type_name_key UNIQUE (name)
 );
 
@@ -97,23 +97,16 @@ CREATE TABLE IF NOT EXISTS answer
         ON UPDATE CASCADE
 );
 
-/*ALTER TABLE answer
-    ADD CONSTRAINT max_answer_count_constraint
-    CHECK (SELECT COUNT(*) FROM answer WHERE question_id = NEW.question_id) <=
-    (SELECT max_answer_count FROM test_type WHERE id =
-    (SELECT test_id FROM question WHERE id = NEW.question_id));*/
-
-
 ---Табличка "Результат"
 ---3 NF
 CREATE TABLE IF NOT EXISTS result
 (
     id           UUID PRIMARY KEY,
-    user_id      UUID       NOT NULL,
-    test_id      UUID       NOT NULL,
-    section_id   UUID       NOT NULL,
+    user_id      UUID NOT NULL,
+    test_id      UUID NOT NULL,
+    section_id   UUID NOT NULL,
+    grade        INT  NOT NULL,
     date_of_test TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    grade        DECIMAL(1) NOT NULL,
     CONSTRAINT grade_between_1_and_100 CHECK (grade BETWEEN 1 AND 100),
     CONSTRAINT result_user_id_fk FOREIGN KEY (user_id) REFERENCES user (id)
         ON DELETE CASCADE
@@ -129,13 +122,13 @@ CREATE TABLE IF NOT EXISTS result
 ---Табличка "Тест-розділ" (багато до багатьох)
 CREATE TABLE section_test
 (
-    section_id    UUID NOT NULL,
-    test_id UUID NOT NULL,
-    PRIMARY KEY(test_id, section_id),
-    CONSTRAINT fk_tests_sections_tests FOREIGN KEY (test_id) REFERENCES test (id)
+    section_id UUID NOT NULL,
+    test_id    UUID NOT NULL,
+    PRIMARY KEY (section_id, test_id),
+    CONSTRAINT fk_section_test_tests FOREIGN KEY (test_id) REFERENCES test (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    CONSTRAINT fk_tests_sections_section FOREIGN KEY (section_id) REFERENCES section (id)
+    CONSTRAINT fk_section_test_sections FOREIGN KEY (section_id) REFERENCES section (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );

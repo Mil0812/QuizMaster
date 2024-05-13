@@ -9,7 +9,10 @@ import com.mil0812.persistence.repository.interfaces.TestRepository;
 import com.mil0812.persistence.repository.interfaces.TestTypeRepository;
 import com.mil0812.persistence.repository.mappers.RowMapper;
 import com.mil0812.persistence.repository.mappers.impl.TestTypeRowMapper;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -23,12 +26,23 @@ public class TestTypeRepositoryImpl extends GenericJdbcRepository<TestType>
   }
 
   @Override
-  protected List<String> tableAttributes() {
-    return List.of("name", "description", "title", "image", "max_answer_count", "correct_answer_count");
-  }
+  protected Map<String, Object> tableValues(TestType testType) {
+    Map<String, Object> values = new LinkedHashMap<>();
 
-  @Override
-  protected List<Object> tableValues(TestType entity) {
-    return null;
+    if (!testType.name().isBlank()) {
+      values.put("name", testType.name());
+    }
+    if (!testType.description().isBlank()) {
+      values.put("description", testType.description());
+    }
+    if (!testType.title().isBlank()) {
+      values.put("title", testType.title());
+    }
+    if (!testType.image().isBlank()) {
+      values.put("image", testType.image());
+    }
+    values.put("max_answer_count", testType.maxAnswerCount());
+    values.put("correct_answer_count", testType.correctAnswerCount());
+    return values;
   }
 }

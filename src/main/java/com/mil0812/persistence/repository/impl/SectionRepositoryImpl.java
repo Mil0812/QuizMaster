@@ -9,7 +9,10 @@ import com.mil0812.persistence.repository.interfaces.TableTitles;
 import com.mil0812.persistence.repository.mappers.RowMapper;
 import com.mil0812.persistence.repository.mappers.impl.SectionRowMapper;
 import com.mil0812.persistence.repository.mappers.impl.TestRowMapper;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
@@ -23,23 +26,14 @@ public class SectionRepositoryImpl extends GenericJdbcRepository<Section>
 
   public SectionRepositoryImpl
       (ConnectionManager connectionManager,
-      RowMapper<Section> rowMapper,
-      TestRowMapper testRowMapper,
-      ManyToManyJBDC<Test> manyToManyJBDC) {
+          RowMapper<Section> rowMapper,
+          TestRowMapper testRowMapper,
+          ManyToManyJBDC<Test> manyToManyJBDC) {
     super(connectionManager, rowMapper, TableTitles.SECTION.getName());
     this.testRowMapper = testRowMapper;
     this.manyToManyJBDC = manyToManyJBDC;
   }
 
-  @Override
-  protected List<String> tableAttributes() {
-    return List.of("name", "tests");
-  }
-
-  @Override
-  protected List<Object> tableValues(Section entity) {
-    return null;
-  }
 
   @Override
   public boolean attach(UUID sectionId, UUID testId) {
@@ -82,5 +76,15 @@ public class SectionRepositoryImpl extends GenericJdbcRepository<Section>
         sql,
         testRowMapper,
         STR."Помилка при отриманні всіх тестів розділу за id: \{sectionId}");
+  }
+
+  @Override
+  protected Map<String, Object> tableValues(Section section) {
+    Map<String, Object> values = new LinkedHashMap<>();
+    if (!section.name().isBlank()) {
+      values.put("name", section.name());
+    }
+    values.put("name", section.name());
+    return values;
   }
 }

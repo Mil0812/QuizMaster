@@ -9,8 +9,12 @@ import com.mil0812.persistence.repository.interfaces.TableTitles;
 import com.mil0812.persistence.repository.interfaces.TestTypeRepository;
 import com.mil0812.persistence.repository.mappers.RowMapper;
 import com.mil0812.persistence.repository.mappers.impl.QuestionRowMapper;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
@@ -25,17 +29,25 @@ public class QuestionRepositoryImpl extends GenericJdbcRepository<Question>
   }
 
   @Override
-  protected List<String> tableAttributes() {
-    return List.of("type", "test_id", "question_text");
-  }
-
-  @Override
-  protected List<Object> tableValues(Question entity) {
-    return null;
-  }
-
-  @Override
   public Optional<Question> findByTestId(UUID testId) {
-    return findBy("type", testId);
+    return findBy("test_id", testId);
+  }
+
+  @Override
+  public Set<Question> findAllByTestId(UUID testId) {
+    return findAllWhere(STR."test_id = \{testId}");
+  }
+
+  @Override
+  protected Map<String, Object> tableValues(Question question) {
+    Map<String, Object> values = new LinkedHashMap<>();
+
+    if (!question.questionText().isBlank()) {
+      values.put("question_text", question.questionText());
+    }
+    if (Objects.nonNull(question.testId())) {
+      values.put("test_id", question.testId());
+    }
+    return values;
   }
 }

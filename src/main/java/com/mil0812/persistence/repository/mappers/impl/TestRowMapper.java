@@ -1,6 +1,8 @@
 package com.mil0812.persistence.repository.mappers.impl;
 
 import com.mil0812.persistence.entity.impl.Test;
+import com.mil0812.persistence.entity.proxy.interfaces.Sections;
+import com.mil0812.persistence.entity.proxy.interfaces.UserProxy;
 import com.mil0812.persistence.repository.mappers.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,44 +31,9 @@ public class TestRowMapper implements RowMapper<Test> {
         userId,
         testTypeId,
         rs.getString("title"),
-        rs.getBytes("image"),
+        rs.getString("image"),
         rs.getInt("question_count"),
         sections
     );
   }
 }
-
-/*
-
- // TODO: make lazy loading for User and Post
-
-@Component
-public class PostRowMapper implements RowMapper<Post> {
-
-  private final Tags tags;
-  private final UserProxy userProxy;
-
-  public PostRowMapper(Tags tags, UserProxy userProxy) {
-    this.tags = tags;
-    this.userProxy = userProxy;
-  }
-
-  @Override
-  public Post mapRow(ResultSet rs) throws SQLException {
-    UUID id = UUID.fromString(rs.getString("id"));
-    UUID userId = UUID.fromString(rs.getString("user_id"));
-    return new Post(
-        id,
-        rs.getString("slug"),
-        rs.getString("title"),
-        rs.getString("description"),
-        rs.getString("body"),
-        rs.getBytes("image"),
-        rs.getBoolean("is_published"),
-        rs.getTimestamp("created_at").toLocalDateTime(),
-        rs.getTimestamp("updated_at").toLocalDateTime(),
-        userId,
-        userProxy,
-        tags);
-  }
-}*/

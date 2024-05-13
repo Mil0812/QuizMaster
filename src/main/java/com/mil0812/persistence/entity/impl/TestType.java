@@ -11,12 +11,12 @@ public record TestType(
     String name,
     String description,
     String title,
-    byte[] image,
+    String image,
     int maxAnswerCount,
     int correctAnswerCount
 ) implements Entity, Comparable<TestType> {
 
-  public TestType(UUID id, String name, String description, String title, byte[] image,
+  public TestType(UUID id, String name, String description, String title, String image,
       int maxAnswerCount, int correctAnswerCount) {
     this.id = id;
     this.name = name;
@@ -27,14 +27,6 @@ public record TestType(
     this.correctAnswerCount = correctAnswerCount;
   }
 
-
-  @Override
-  public int hashCode() {
-    int result = Objects.hash(id, name, description, title, maxAnswerCount, correctAnswerCount);
-    result = 31 * result + Arrays.hashCode(image);
-    return result;
-  }
-
   @Override
   public int compareTo(TestType tt) {
     return this.name.compareTo(tt.name);
@@ -42,7 +34,6 @@ public record TestType(
 
   @Override
   public String toString() {
-    return STR."TestType{id=\{id}, name='\{name}\{'\''}, description='\{description}\{'\''}, title='\{title}\{'\''}, image=\{Arrays.toString(
-        image)}, maxAnswerCount=\{maxAnswerCount}, correctAnswerCount=\{correctAnswerCount}\{'}'}";
+    return STR."TestType{id=\{id}, name='\{name}\{'\''}, description='\{description}\{'\''}, title='\{title}\{'\''}, image='\{image}\{'\''}, maxAnswerCount=\{maxAnswerCount}, correctAnswerCount=\{correctAnswerCount}\{'}'}";
   }
 }

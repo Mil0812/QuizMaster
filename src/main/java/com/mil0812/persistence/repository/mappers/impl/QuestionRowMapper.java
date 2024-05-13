@@ -2,6 +2,7 @@ package com.mil0812.persistence.repository.mappers.impl;
 
 import com.mil0812.persistence.entity.impl.Question;
 import com.mil0812.persistence.entity.proxy.impl.TestsProxy;
+import com.mil0812.persistence.entity.proxy.interfaces.TestProxy;
 import com.mil0812.persistence.repository.mappers.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,10 +11,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class QuestionRowMapper implements RowMapper<Question> {
-  private final TestsProxy testsProxy;
+  private final TestProxy testProxy;
 
-  public QuestionRowMapper(TestsProxy testsProxy) {
-    this.testsProxy = testsProxy;
+  public QuestionRowMapper(TestProxy testProxy) {
+    this.testProxy = testProxy;
   }
 
   @Override
@@ -23,7 +24,7 @@ public class QuestionRowMapper implements RowMapper<Question> {
 
     return new Question(
         id,
-        testsProxy,
+        testProxy,
         testId,
         rs.getString("question_text")
     );

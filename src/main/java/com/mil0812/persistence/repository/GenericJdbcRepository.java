@@ -17,8 +17,10 @@ import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,7 +35,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
   private final String tableName;
 
   public GenericJdbcRepository(
-      ConnectionManager connectionManager, RowMapper<T> rowMapper, String tableName) {
+    ConnectionManager connectionManager, RowMapper<T> rowMapper, String tableName) {
     this.connectionManager = connectionManager;
     this.rowMapper = rowMapper;
     this.tableName = tableName;
@@ -49,16 +51,13 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
     final String sql =
         STR."""
                     SELECT *
-                      FROM \{
-            tableName}
-                     WHERE \{
-            column} = ?
+                      FROM \{tableName}
+                     WHERE \{column} = ?
                 """;
 
-    UUID id = (UUID) value;
     try (Connection connection = connectionManager.get();
         PreparedStatement statement = connection.prepareStatement(sql)) {
-      statement.setObject(1, id, Types.OTHER);
+      statement.setObject(1, value, Types.OTHER);
       ResultSet resultSet = statement.executeQuery();
       resultSet.next();
       return Optional.ofNullable(rowMapper.mapRow(resultSet));
@@ -69,14 +68,22 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
 
   @Override
   public Set<T> findAllWhere(String whereQuery) {
+    try (Connection connection = connectionManager.get()) {
+      return findAllWhere(whereQuery, connection);
+    } catch (SQLException throwables) {
+      throw new EntityNotFound(
+          STR."Помилка при отриманні всіх запитів з таблиці: \{tableName}");
+    }
+  }
+
+  private Set<T> findAllWhere(String whereQuery, Connection connection) {
     final String sql = STR."""
             SELECT *
               FROM \{tableName}
              WHERE \{whereQuery}
         """;
 
-    try (Connection connection = connectionManager.get();
-        PreparedStatement statement = connection.prepareStatement(sql)) {
+    try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
       ResultSet resultSet = statement.executeQuery();
       Set<T> entities = new LinkedHashSet<>();
@@ -107,88 +114,161 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
       return entities;
     } catch (SQLException throwables) {
       throw new EntityNotFound(
-          STR."Помилка при отриманні всіх запитів з таблиці: \{tableName}");
+          STR."Помилка при отриманні всіх запитів з таблиці: \{tableName}...");
+    }
+  }
+
+  @Override
+  public Set<T> findAll(int offset, int limit) {
+    return findAll(offset, limit, "id", true);
+  }
+
+  @Override
+  public Set<T> findAll(int offset, int limit, String sortColumn, boolean ascending) {
+    return findAll(offset, limit, sortColumn, ascending, new HashMap<>());
+  }
+
+  public Set<T> findAll(int offset, int limit, String sortColumn, boolean ascending,
+      Map<String, Object> filters) {
+    return findAll(offset, limit, sortColumn, ascending, filters, "");
+  }
+
+  @Override
+  public Set<T> findAll(int offset, int limit, String sortColumn, boolean ascending,
+      Map<String, Object> filters, String where) {
+    StringBuilder whereClass = new StringBuilder(!where.isBlank() ? where : "1 = 1");
+    List<Object> values = new ArrayList<>();
+    filters.forEach((column, value) -> {
+
+      if (value instanceof String) {
+        whereClass.append(STR." AND \{column} LIKE ?");
+        values.add(STR."%\{value}%");
+      } else {
+        whereClass.append(STR." AND \{column} = ?");
+        values.add(value);
+      }
+    });
+
+    String sortDirection = ascending ? "ASC" : "DESC";
+    String sql = STR."""
+              SELECT *
+                FROM \{tableName}
+                WHERE \{whereClass}
+             ORDER BY \{sortColumn} \{sortDirection}
+                LIMIT ?
+               OFFSET ?
+        """;
+
+    try (Connection connection = connectionManager.get();
+        PreparedStatement statement = connection.prepareStatement(sql)) {
+      for (int i = 0; i < values.size(); i++) {
+        statement.setObject(i + 1, values.get(i), Types.OTHER);
+      }
+      statement.setInt(values.size() + 1, limit);
+      statement.setInt(values.size() + 2, offset);
+
+      ResultSet resultSet = statement.executeQuery();
+      Set<T> entities = new LinkedHashSet<>();
+      while (resultSet.next()) {
+        entities.add(rowMapper.mapRow(resultSet));
+      }
+      return entities;
+    } catch (SQLException e) {
+      throw new EntityNotFound(
+          "Помилка при отриманні даних з таблиці: %s...".formatted(tableName));
+    }
+  }
+
+  @Override
+  public long count() {
+    final String sql = STR."""
+            SELECT COUNT(ID)
+              FROM \{tableName}
+        """;
+
+    try (Connection connection = connectionManager.get();
+        PreparedStatement statement = connection.prepareStatement(sql)) {
+      ResultSet resultSet = statement.executeQuery();
+      resultSet.next();
+      long count = resultSet.getLong(1);
+      return count;
+    } catch (SQLException throwables) {
+      throw new EntityNotFound(
+          STR."Помилка при отриманні кількості записів з таблиці: \{tableName}...");
     }
   }
 
   @Override
   public T save(final T entity) {
-    List<Object> values = tableValues(entity);
+    var values = tableValues(entity);
 
     T newEntity;
     if (Objects.isNull(entity.id())) {
       UUID newId = UUID.randomUUID();
-      values.addFirst(newId);
+      values.put("id", newId);
       newEntity = insert(values);
     } else {
-      values.addLast(entity.id());
+      values.put("id", entity.id());
       newEntity = update(values);
     }
 
     return newEntity;
   }
-  protected T insert(List<Object> values) {
-    List<String> attributes = tableAttributes();
-    String attributesString = "id, " + String.join(", ", attributes);
+
+  protected T insert(Map<String, Object> values) {
+    var attributes = values.keySet();
+    String attributesString = String.join(", ", attributes);
     String placeholders =
         Stream.generate(() -> "?")
             .limit(attributes.size() + 1)
             .collect(Collectors.joining(", "));
     String sql =
         STR."""
-                INSERT INTO \{
-            tableName} (\{
+                INSERT INTO \{tableName} (\{
             attributesString})
-                VALUES (\{
-            placeholders})
+                VALUES (\{placeholders})
         """;
 
-    /*if (attributes.stream().anyMatch(a -> a.equals("created_at"))) {
-      values.add(LocalDateTime.now()); // created_at
-      values.add(LocalDateTime.now()); // updated_at
-    }*/
+    if (attributes.stream().anyMatch(a -> a.equals("date_of_test"))) {
+      values.put("date_of_test", LocalDateTime.now());
+    }
+    int idIndex = 0;
 
-    return updateExecute(values, sql, "Помилка при додаванні нового запису в таблицю");
+    return updateExecute(values.values(), sql, "Помилка при додаванні нового запису в таблицю...");
   }
-  protected T update(List<Object> values) {
-    List<String> attributes = tableAttributes();
+
+  protected T update(Map<String, Object> values) {
+    var attributes = values.keySet();
     String attributesString =
         attributes.stream()
-            .filter(a -> !a.contains("date_of_test"))
+            .filter(a -> !a.equals("date_of_test") && !a.equals("id"))
             .map(a -> STR."\{a} = ?")
             .collect(Collectors.joining(", "));
-    String sql =
-        STR."""
-                      UPDATE \{tableName}
-                         SET \{attributesString}
-                       WHERE id = ?
-                    """;
+    String sql = STR."""
+                          UPDATE \{tableName}
+                             SET \{attributesString}
+                           WHERE id = ?
+                         """;
 
- /*   if (attributes.stream().anyMatch(a -> a.equals("updated_at"))) {
-      values.add(LocalDateTime.now()); // updated_at
-    }*/
+    if (attributes.stream().anyMatch(a -> a.equals("date_of_test"))) {
+      values.put("date_of_test", LocalDateTime.now());
+    }
 
-    return updateExecute(values, sql, "Помилка при оновленні існуючого запису в таблиці");
+    int idIndex = attributes.size();
+
+    return updateExecute(values.values(), sql,
+        "Помилка при оновленні існуючого запису в таблиці...");
   }
-  private T updateExecute(List<Object> values, String sql, String exceptionMessage) {
+
+  private T updateExecute(Collection<Object> rawValues, String sql, String exceptionMessage) {
+    List<Object> values = new ArrayList<>(rawValues);
     try (Connection connection = connectionManager.get();
         PreparedStatement statement = connection.prepareStatement(sql)) {
       for (int i = 0; i < values.size(); i++) {
-        if(values.get(i) instanceof Enum) {
-          statement.setString(i + 1, values.get(i).toString());
-        } else  {
-          statement.setObject(i + 1, values.get(i), Types.OTHER);
-        }
+        statementSetter(values, i, statement);
       }
-
       statement.executeUpdate();
-
-      UUID id = (UUID) values.stream()
-          .filter(UUID.class::isInstance)
-          .findFirst()
-          .orElseThrow(() -> new NoSuchElementException("UUID не знайдено"));
-
-      return findById(id).orElseThrow();
+      return findById((UUID) values.getLast()).orElseThrow();
     } catch (SQLException | NoSuchElementException e) {
       throw new ErrorOnUpdate(exceptionMessage);
     }
@@ -197,55 +277,50 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
   @Override
   public Set<T> save(Collection<T> entities) {
     Set<T> results;
-    List<List<Object>> listOfValues = new ArrayList<>(new ArrayList<>());
+    List<Map<String, Object>> listOfValues = new ArrayList<>(new LinkedHashSet<>());
 
-    for(var entity: entities) {
-      List<Object> values = tableValues(entity);
-      if (Objects.isNull(entity.id())) {
-        values.addFirst(UUID.randomUUID());
-      } else {
-        values.addLast(entity.id());
-      }
+    for (var entity : entities) {
+      var values = tableValues(entity);
+      values.put("id", Objects.isNull(entity.id()) ? UUID.randomUUID() : entity.id());
       listOfValues.add(values);
     }
 
-    if(entities.stream().allMatch(e -> Objects.isNull(e.id()))) {
+    if (entities.stream().allMatch(e -> Objects.isNull(e.id()))) {
       results = batchInsert(listOfValues);
     } else {
       results = batchUpdate(listOfValues);
     }
     return results;
   }
-  protected Set<T> batchInsert(List<List<Object>> listOfValues) {
-    List<String> attributes = tableAttributes();
-    String attributesString = "id, " + String.join(", ", attributes);
+
+  protected Set<T> batchInsert(List<Map<String, Object>> listOfValues) {
+    var attributes = listOfValues.getFirst().keySet();
+    String attributesString = String.join(", ", attributes);
     String placeholders =
         Stream.generate(() -> "?")
-            .limit(attributes.size() + 1)
+            .limit(attributes.size())
             .collect(Collectors.joining(", "));
     String sql =
         STR."""
-                INSERT INTO \{
-            tableName} (\{
+                INSERT INTO \{tableName} (\{
             attributesString})
-                VALUES (\{
-            placeholders})
+                VALUES (\{placeholders})
         """;
 
-  /*  if (attributes.stream().anyMatch(a -> a.equals("created_at"))) {
+    if (attributes.stream().anyMatch(a -> a.equals("date_of_test"))) {
       listOfValues.forEach(values -> {
-        values.add(LocalDateTime.now()); // created_at
-        values.add(LocalDateTime.now()); // updated_at
+        values.put("date_of_test", LocalDateTime.now());
       });
-    }*/
+    }
 
-    return batchExecute(listOfValues, sql, "Помилка при додаванні нового запису в таблицю");
+    return batchExecute(listOfValues, sql, "Помилка при додаванні нового запису в таблицю...");
   }
-  protected Set<T> batchUpdate(List<List<Object>> listOfValues) {
-    List<String> attributes = tableAttributes();
+
+  protected Set<T> batchUpdate(List<Map<String, Object>> listOfValues) {
+    var attributes = listOfValues.getFirst().keySet();
     String attributesString =
         attributes.stream()
-            .filter(a -> !a.contains("created_at"))
+            .filter(a -> !a.equals("date_of_test") && !a.equals("id"))
             .map(a -> STR."\{a} = ?")
             .collect(Collectors.joining(", "));
     String sql =
@@ -255,56 +330,85 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
                        WHERE id = ?
                     """;
 
-   /* if (attributes.stream().anyMatch(a -> a.equals("updated_at"))) {
+    if (attributes.stream().anyMatch(a -> a.equals("date_of_test"))) {
       listOfValues.forEach(values -> {
-        values.add(LocalDateTime.now()); // updated_at
+        values.put("date_of_test", LocalDateTime.now());
       });
-    }*/
-
-    return batchExecute(listOfValues, sql, "Помилка при оновленні існуючого запису в таблиці");
-  }
-  private Set<T> batchExecute(List<List<Object>> listOfValues, String sql, String exceptionMessage) {
-    Set<T> results = new LinkedHashSet<>();
-    try (Connection connection = connectionManager.get();
-        PreparedStatement statement = connection.prepareStatement(sql)) {
-
-      for(var values: listOfValues) {
-        for (int i = 0; i < values.size(); i++) {
-          statement.setObject(i + 1, values.get(i), Types.OTHER);
-        }
-        statement.addBatch();
-      }
-
-      statement.executeBatch();
-
-      // тут ми додаєм результат додавання
-      results = getEntitiesAfterBatchExecute(listOfValues);
-    } catch (SQLException throwables) {
-      throw new ErrorOnUpdate(exceptionMessage);
     }
+
+    return batchExecute(listOfValues, sql, "Помилка при оновленні існуючого запису в таблиці...");
+  }
+
+  private Set<T> batchExecute(List<Map<String, Object>> listOfRawValues, String sql,
+      String exceptionMessage) {
+    Set<T> results;
+    var listOfValues = listOfRawValues.stream()
+        .map(values -> new ArrayList<>(values.values())).toList();
+    try (Connection connection = connectionManager.get()) {
+      connection.setAutoCommit(false);
+
+      try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        for (var values : listOfValues) {
+          for (int i = 0; i < values.size(); i++) {
+            statementSetter(values, i, statement);
+          }
+          statement.addBatch();
+        }
+
+        statement.executeBatch();
+
+        results = getEntitiesAfterBatchExecute(listOfValues, connection);
+
+        if (results.isEmpty() || listOfValues.size() != results.size()) {
+          connection.rollback();
+          throw new ErrorOnUpdate(exceptionMessage);
+        } else {
+          connection.commit();
+        }
+      } catch (SQLException throwables) {
+        connection.rollback();
+        throw new ErrorOnUpdate(exceptionMessage);
+      }
+    } catch (SQLException e) {
+      throw new ErrorOnUpdate("Помилка при роботі з підключенням до бази даних...");
+    }
+
     return results;
   }
-  private Set<T> getEntitiesAfterBatchExecute(List<List<Object>> listOfValues) {
+
+  private static void statementSetter(List<Object> values, int i, PreparedStatement statement)
+      throws SQLException {
+    if (values.get(i) instanceof Enum) {
+      statement.setString(i + 1, values.get(i).toString());
+    } else if (values.get(i) instanceof byte[] && Objects.nonNull(values.get(i))) {
+      statement.setBytes(i + 1, (byte[]) values.get(i));
+    } else {
+      statement.setObject(i + 1, values.get(i), Types.OTHER);
+    }
+  }
+
+  private Set<T> getEntitiesAfterBatchExecute(List<ArrayList<Object>> listOfValues,
+      Connection connection) {
     Set<T> results;
     List<String> ids = listOfValues.stream().map(values -> {
       UUID id = (UUID) values.stream()
           .filter(UUID.class::isInstance)
           .findFirst()
-          .orElseThrow(() -> new NoSuchElementException("UUID не знайдено"));
+          .orElseThrow(() -> new NoSuchElementException("UUID не знайдено..."));
 
       return STR."'\{id.toString()}'";
     }).toList();
 
-    results = findAllWhere(STR."id IN(\{String.join(", ", ids)})");
+    results = findAllWhere(STR."id IN(\{String.join(", ", ids)})", connection);
     return results;
   }
+
 
   @Override
   public boolean delete(UUID id) {
     final String sql =
         STR."""
-                    DELETE FROM \{
-            tableName}
+                    DELETE FROM \{tableName}
                           WHERE id = ?
                 """;
 
@@ -315,10 +419,10 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
       return statement.executeUpdate() > 0;
     } catch (SQLException throwables) {
       throw new ErrorOnDelete(
-          STR."Помилка при видаленні запису з таблиці по id: \{id.toString()}");
+          STR."Помилка при видаленні запису з таблиці по id: \{id.toString()}...");
     }
   }
-  public boolean delete(Collection<UUID> ids) {
+  public boolean delete(Collection<UUID> uuid) {
     final String sql =
         STR."""
                     DELETE FROM \{tableName}
@@ -328,7 +432,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
     try (Connection connection = connectionManager.get();
         PreparedStatement statement = connection.prepareStatement(sql)) {
 
-      for(var id: ids) {
+      for(var id: uuid) {
         statement.setObject(1, id, Types.OTHER);
         statement.addBatch();
       }
@@ -337,12 +441,10 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
       return statement.executeUpdate() > 0;
     } catch (SQLException throwables) {
       throw new ErrorOnDelete(
-          STR."Помилка при видаленні записів з таблиці по ids: \{ids.toString()}");
+          STR."Помилка при видаленні записів з таблиці по id: \{uuid.toString()}...");
     }
   }
 
-  protected abstract List<String> tableAttributes();
-
-  protected abstract List<Object> tableValues(T entity);
+  protected abstract Map<String, Object> tableValues(T entity);
 
 }

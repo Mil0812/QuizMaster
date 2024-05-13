@@ -8,7 +8,13 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface TestRepository extends Repository<Test>, ManyToMany {
+
   Optional<Test> findByAuthor(UUID userId);
+
   Optional<Test> findByTestType(UUID testTypeId);
+
+  Set<Test> findAllByAuthorId(UUID userId);
+
   Set<Section> getSections(UUID testId);
+
 }

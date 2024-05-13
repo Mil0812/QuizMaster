@@ -1,8 +1,10 @@
 package com.mil0812.domain.service;
+
 import java.util.Collection;
 import java.util.UUID;
+import java.util.Set;
 
-public interface CRUDService <T>{
+public interface CRUDService<T> {
 
   T findById(UUID id);
 

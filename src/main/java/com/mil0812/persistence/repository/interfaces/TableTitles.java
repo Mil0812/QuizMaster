@@ -2,7 +2,6 @@ package com.mil0812.persistence.repository.interfaces;
 
 import org.springframework.stereotype.Component;
 
-@Component
 public enum TableTitles {
   USER("user"),
   TEST("test"),

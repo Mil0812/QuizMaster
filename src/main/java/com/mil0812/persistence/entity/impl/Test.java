@@ -1,9 +1,8 @@
 package com.mil0812.persistence.entity.impl;
 
 import com.mil0812.persistence.entity.Entity;
-import com.mil0812.persistence.entity.proxy.impl.SectionsProxy;
-import com.mil0812.persistence.entity.proxy.impl.UserProxyImpl;
-import java.awt.Image;
+import com.mil0812.persistence.entity.proxy.interfaces.Sections;
+import com.mil0812.persistence.entity.proxy.interfaces.UserProxy;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -11,17 +10,17 @@ import java.util.UUID;
 
 public record Test(
     UUID id,
-    UserProxyImpl user,
+    UserProxy user,
     UUID userId,
     UUID testTypeId,
     String title,
-    byte[] image,
+    String image,
     int questionCount,
-    SectionsProxy sections
+    Sections sections
 ) implements Entity, Comparable<Test> {
 
-  public Test(UUID id, UserProxyImpl user, UUID userId, UUID testTypeId, String title, byte[] image,
-      int questionCount, SectionsProxy sections) {
+  public Test(UUID id, UserProxy user, UUID userId, UUID testTypeId, String title, String image,
+      int questionCount, Sections sections) {
     this.id = id;
     this.user = user;
     this.userId = userId;
@@ -44,22 +43,16 @@ public record Test(
     return questionCount == test.questionCount && Objects.equals(id, test.id)
         && Objects.equals(user, test.user) && Objects.equals(userId, test.userId)
         && Objects.equals(testTypeId, test.testTypeId) && Objects.equals(title,
-        test.title) && Arrays.equals(image, test.image) && Objects.equals(
+        test.title) && Objects.equals(image, test.image) && Objects.equals(
         sections, test.sections);
   }
 
-  @Override
-  public int hashCode() {
-    int result = Objects.hash(id, user, userId, testTypeId, title, questionCount, sections);
-    result = 31 * result + Arrays.hashCode(image);
-    return result;
-  }
 
-  public Set<Section> receiveSectionsLazy(){
+  public Set<Section> receiveSectionsLazy() {
     return sections.get(id);
   }
 
-  public User receiveUserLazy(){
+  public User receiveUserLazy() {
     return user.get(id);
   }
 
@@ -71,7 +64,6 @@ public record Test(
 
   @Override
   public String toString() {
-    return STR."Test{id=\{id}, user=\{user}, userId=\{userId}, testTypeId=\{testTypeId}, title='\{title}\{'\''}, image=\{Arrays.toString(
-        image)}, questionCount=\{questionCount}, sections=\{sections}\{'}'}";
+    return STR."Test{id=\{id}, user=\{user}, userId=\{userId}, testTypeId=\{testTypeId}, title='\{title}\{'\''}, image='\{image}\{'\''}, questionCount=\{questionCount}, sections=\{sections}\{'}'}";
   }
 }

@@ -6,8 +6,12 @@ import com.mil0812.persistence.entity.impl.Test;
 import com.mil0812.persistence.repository.GenericJdbcRepository;
 import com.mil0812.persistence.repository.interfaces.TableTitles;
 import com.mil0812.persistence.repository.interfaces.TestRepository;
+import com.mil0812.persistence.repository.mappers.impl.SectionRowMapper;
 import com.mil0812.persistence.repository.mappers.impl.TestRowMapper;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -17,19 +21,37 @@ import org.springframework.stereotype.Repository;
 public class TestRepositoryImpl extends GenericJdbcRepository<Test>
     implements TestRepository {
 
+  private final SectionRowMapper sectionRowMapper;
+  private final ManyToManyJBDC<Section> manyToManyJBDC;
+
   public TestRepositoryImpl(ConnectionManager connectionManager,
-      TestRowMapper testRowMapper) {
+      TestRowMapper testRowMapper, SectionRowMapper sectionRowMapper,
+      ManyToManyJBDC<Section> manyToManyJBDC) {
     super(connectionManager, testRowMapper, TableTitles.TEST.getName());
+    this.sectionRowMapper = sectionRowMapper;
+    this.manyToManyJBDC = manyToManyJBDC;
   }
 
-  @Override
-  protected List<String> tableAttributes() {
-    return List.of("user", "testTypeId", "title", "image", "questionCount", "sections");
-  }
 
   @Override
-  protected List<Object> tableValues(Test entity) {
-    return null;
+  protected Map<String, Object> tableValues(Test test) {
+    Map<String, Object> values = new LinkedHashMap<>();
+
+    if (Objects.nonNull(test.userId())) {
+      values.put("user_id", test.userId());
+    }
+    if (Objects.nonNull(test.testTypeId())) {
+      values.put("type_id", test.testTypeId());
+    }
+    if (!test.title().isBlank()) {
+      values.put("title", test.title());
+    }
+    if (!test.image().isBlank()) {
+      values.put("image", test.image());
+    }
+    values.put("question_count", test.questionCount());
+
+    return values;
   }
 
   @Override
@@ -51,6 +73,7 @@ public class TestRepositoryImpl extends GenericJdbcRepository<Test>
             """;
     return false;
   }
+
   @Override
   public Optional<Test> findByAuthor(UUID userId) {
     return findBy("user", userId);
@@ -58,7 +81,12 @@ public class TestRepositoryImpl extends GenericJdbcRepository<Test>
 
   @Override
   public Optional<Test> findByTestType(UUID testTypeId) {
-    return findBy("test_type_id", testTypeId);
+    return findBy("type_id", testTypeId);
+  }
+
+  @Override
+  public Set<Test> findAllByAuthorId(UUID userId) {
+    return findAllWhere(STR."user_id = \{userId}");
   }
 
   @Override
@@ -73,6 +101,9 @@ public class TestRepositoryImpl extends GenericJdbcRepository<Test>
              WHERE st.test_id = ?;
             """;
 
-    return null;
+    return manyToManyJBDC.getEntities(
+        testId, sql, sectionRowMapper,
+        STR."Помилка при отриманні всіх розділів тесту по id: \{testId}"
+    );
   }
 }

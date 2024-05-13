@@ -15,13 +15,13 @@ public class TestTypeRowMapper implements RowMapper<TestType> {
     UUID id = UUID.fromString(rs.getString("id"));
 
     return new TestType(
-      id,
-      rs.getString("name"),
-      rs.getString("description"),
-      rs.getString("title"),
-      rs.getBytes("image"),
-      rs.getInt("max_answer_count"),
-      rs.getInt("correct_answer_count")
+        id,
+        rs.getString("name"),
+        rs.getString("description"),
+        rs.getString("title"),
+        rs.getString("image"),
+        rs.getInt("max_answer_count"),
+        rs.getInt("correct_answer_count")
     );
   }
 }

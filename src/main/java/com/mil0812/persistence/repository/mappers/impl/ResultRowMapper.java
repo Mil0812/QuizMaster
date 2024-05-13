@@ -1,6 +1,9 @@
 package com.mil0812.persistence.repository.mappers.impl;
 
 import com.mil0812.persistence.entity.impl.Result;
+import com.mil0812.persistence.entity.proxy.interfaces.SectionProxy;
+import com.mil0812.persistence.entity.proxy.interfaces.TestProxy;
+import com.mil0812.persistence.entity.proxy.interfaces.UserProxy;
 import com.mil0812.persistence.repository.mappers.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,9 +12,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ResultRowMapper implements RowMapper<Result> {
+
   private final UserProxy userProxy;
   private final TestProxy testProxy;
   private final SectionProxy sectionProxy;
+
+  public ResultRowMapper(UserProxy userProxy, TestProxy testProxy, SectionProxy sectionProxy) {
+    this.userProxy = userProxy;
+    this.testProxy = testProxy;
+    this.sectionProxy = sectionProxy;
+  }
 
 
   @Override
@@ -29,8 +39,8 @@ public class ResultRowMapper implements RowMapper<Result> {
         testId,
         sectionProxy,
         sectionId,
-        rs.getTimestamp("date_of_text").toLocalDateTime(),
-        rs.getDouble("grade")
+        rs.getInt("grade"),
+        rs.getTimestamp("date_of_text").toLocalDateTime()
     );
   }
 }

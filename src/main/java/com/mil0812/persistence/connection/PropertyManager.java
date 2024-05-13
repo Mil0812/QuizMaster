@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * Клас, де зчитуються значення з application.properties
  */
 @Component
-public class PropertyManager {
+public final class PropertyManager {
 
   private static final Properties PROPERTIES = new Properties();
   final Logger logger = LoggerFactory.getLogger(PropertyManager.class);

@@ -1,26 +1,25 @@
 package com.mil0812.persistence.entity.impl;
 
 import com.mil0812.persistence.entity.Entity;
-import com.mil0812.persistence.entity.proxy.impl.SectionProxyImpl;
-import com.mil0812.persistence.entity.proxy.impl.TestProxyImpl;
-import com.mil0812.persistence.entity.proxy.impl.UserProxyImpl;
+import com.mil0812.persistence.entity.proxy.interfaces.SectionProxy;
+import com.mil0812.persistence.entity.proxy.interfaces.TestProxy;
+import com.mil0812.persistence.entity.proxy.interfaces.UserProxy;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-//TODO: SectionProxy and UserProxy
 public record Result(
     UUID id,
-    UserProxyImpl user,
+    UserProxy user,
     UUID userId,
-    TestProxyImpl test,
+    TestProxy test,
     UUID testId,
-    SectionProxyImpl section,
+    SectionProxy section,
     UUID sectionId,
-    LocalDateTime dateOfTest,
-    double grade
+    int grade,
+    LocalDateTime dateOfTest
 )
-implements Entity, Comparable<Result> {
+    implements Entity, Comparable<Result> {
 
   @Override
   public int compareTo(Result r) {
