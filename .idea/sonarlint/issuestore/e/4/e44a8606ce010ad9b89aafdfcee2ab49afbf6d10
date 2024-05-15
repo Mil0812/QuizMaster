@@ -1,8 +1,46 @@
 
 €
-java:S1104"^Make persistenceContext a static final constant or non-public and provide accessors if needed.(È†üùÿÿÿÿ8ª£–÷1
+java:S1104"^Make persistenceContext a static final constant or non-public and provide accessors if needed.(È†üùÿÿÿÿ8À¤ùæ÷1
 Z
-java:S1444"8Make this "public static persistenceContext" field final(È†üùÿÿÿÿ8«£–÷1
+java:S1444"8Make this "public static persistenceContext" field final(È†üùÿÿÿÿ8À¤ùæ÷1
 7
-java:S1220""Move this file to a named package.8°Ñï¢ö1
-X	java:S125("<This block of commented-out lines of code should be removed.(°Ïšé8ø›´¥ö1
+java:S1220""Move this file to a named package.8Á¤ùæ÷1
+]	java:S125+"<This block of commented-out lines of code should be removed.(Éç¶ªûÿÿÿÿ8¿ˆ½ç÷1
+Y
+java:S14814"7Remove this unused "persistenceContext" local variable.(èõ£Ëÿÿÿÿÿ8Àˆ½ç÷1
+X	java:S1256"<This block of commented-out lines of code should be removed.(Š´ë‘8Áˆ½ç÷1
+W	java:S125G"<This block of commented-out lines of code should be removed.(–™ˆ8Áˆ½ç÷1
+]	java:S125m"<This block of commented-out lines of code should be removed.(Š¤”Öşÿÿÿÿ8Áˆ½ç÷1
+e
+java:S1128"HRemove this unused import 'com.mil0812.persistence.entity.impl.Section'.(ü­À„8­ôüë÷1
+g
+java:S1128"ERemove this unused import 'com.mil0812.persistence.entity.impl.Test'.(Ç·ï‚ÿÿÿÿÿ8®ôüë÷1
+g
+java:S1128"ERemove this unused import 'com.mil0812.persistence.entity.impl.User'.(ú¶ğöúÿÿÿÿ8®ôüë÷1
+n
+java:S1128"LRemove this unused import 'com.mil0812.persistence.entity.impl.User.Status'.(«ûÿÿÿÿ8®ôüë÷1
+q
+java:S1128"TRemove this unused import 'com.mil0812.persistence.entity.proxy.impl.UserProxyImpl'.(Ôõ8¯ôüë÷1
+w
+java:S1128	"URemove this unused import 'com.mil0812.persistence.entity.proxy.interfaces.Sections'.(îÌÊ”üÿÿÿÿ8¯ôüë÷1
+x
+java:S1128
+"VRemove this unused import 'com.mil0812.persistence.entity.proxy.interfaces.UserProxy'.(è•‹“şÿÿÿÿ8°ôüë÷1
+{
+java:S1128"YRemove this unused import 'com.mil0812.persistence.repository.interfaces.UserRepository'.(âÖˆ¹şÿÿÿÿ8°ôüë÷1
+L
+java:S1128"*Remove this unused import 'java.util.Set'.(ö²„¤şÿÿÿÿ8°ôüë÷1
+M
+java:S1128"+Remove this unused import 'java.util.UUID'.(ÀãÄ£úÿÿÿÿ8±ôüë÷1
+W
+java:S1128";Remove this unused import 'javafx.application.Application'.(í™şj8±ôüë÷1
+U
+java:S1128"3Remove this unused import 'javafx.fxml.FXMLLoader'.(À‡ô³úÿÿÿÿ8±ôüë÷1
+M
+java:S1128"0Remove this unused import 'javafx.scene.Parent'.(²ä¡È8²ôüë÷1
+L
+java:S1128"/Remove this unused import 'javafx.scene.Scene'.(Õü²8²ôüë÷1
+Q
+java:S1128"/Remove this unused import 'javafx.stage.Stage'.(æÄ¸²úÿÿÿÿ8²ôüë÷1
+h
+java:S1128"KRemove this unused import 'org.springframework.context.ApplicationContext'.(»Ô»¿8³ôüë÷1

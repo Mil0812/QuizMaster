@@ -20,8 +20,6 @@ import org.springframework.stereotype.Component;
 public class ConnectionManager {
 
   private static final String URL_KEY = "db.url";
-  private static final String USERNAME_KEY = "db.username";
-  private static final String PASSWORD_KEY = "db.password";
   private static final String POOL_SIZE_KEY = "db.pool.size";
   private static final Integer DEFAULT_POOL_SIZE = 10;
   private final PropertyManager propertyManager;
@@ -36,15 +34,26 @@ public class ConnectionManager {
 
   public Connection get() {
     try {
-      logger.info("Підключення отримано з пулу [%d]...".formatted(pool.size()));
+      logger.info("Підключення отримано з пулу #[%d]...".formatted(pool.size()));
       Connection connection = pool.take();
       connection.setAutoCommit(true);
       return connection;
     } catch (InterruptedException e) {
-      logger.error("Помилка при отриманні підключення з пулу %s...".formatted(e));
+      logger.error("Помилка при отриманні підключення з пулу #%s...".formatted(e));
       throw new RuntimeException(e);
     } catch (SQLException e) {
-      logger.error("Не вдалося встановити автофіксацію для з'єднання з пулом %s...".formatted(e));
+      logger.error("Не вдалося встановити автофіксацію для з'єднання з пулом #%s...".formatted(e));
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void release(Connection connection) {
+    try {
+      if (!connection.isClosed()) {
+        pool.add(connection); // Додаємо з'єднання до черги, якщо воно не закрите
+      }
+    } catch (SQLException e) {
+      logger.error("Помилка при поверненні з'єднання в пул: " + e.getMessage());
       throw new RuntimeException(e);
     }
   }
@@ -56,7 +65,7 @@ public class ConnectionManager {
       }
       logger.info("Всі підключення успішно закриті!");
     } catch (SQLException e) {
-      logger.error("Не вдалося правильно закрити підключення %s...".formatted(e));
+      logger.error("Не вдалося правильно закрити підключення з пулу #%s...".formatted(e));
       throw new RuntimeException(e);
     }
   }
@@ -64,9 +73,7 @@ public class ConnectionManager {
   private Connection open() {
     try {
       return DriverManager.getConnection(
-          propertyManager.get(URL_KEY),
-          propertyManager.get(USERNAME_KEY),
-          propertyManager.get(PASSWORD_KEY));
+          propertyManager.get(URL_KEY));
     } catch (SQLException e) {
       logger.error("Помилка при відкритті підключення... %s".formatted(e));
       throw new RuntimeException(e);
@@ -74,12 +81,10 @@ public class ConnectionManager {
   }
 
   /**
-   * Метод для ініціалізації пулу підключення
-   * Що робить?
-   * 1) отримує розмір пулу (дефолтний або заданий у властивостях)
-   * 2) створюємо чергу, яка підтримує багатопоточність
-   * 3) через цикл відкриваємо всі підключення і переписуємо їх на Proxy
-   * (тобто створюємо тимчасовий Proxy-клас, який реалізує інтерфейс Connection)
+   * Метод для ініціалізації пулу підключення. Що робить? 1) отримує розмір пулу (дефолтний або
+   * заданий у властивостях) 2) створюємо чергу, яка підтримує багатопоточність 3) через цикл
+   * відкриваємо всі підключення і переписуємо їх на Proxy (тобто створюємо тимчасовий Proxy-клас,
+   * який реалізує інтерфейс Connection)
    */
   private void initConnectionPool() {
     String poolSize = propertyManager.get(POOL_SIZE_KEY);
@@ -93,14 +98,14 @@ public class ConnectionManager {
           (Connection)
               Proxy.newProxyInstance(
                   ConnectionManager.class.getClassLoader(),
-                  new Class[] {Connection.class},
+                  new Class[]{Connection.class},
                   ((proxy, method, args) ->
                       method.getName().equals("close")
                           ? pool.add((Connection) proxy)
                           : method.invoke(connection, args)));
       pool.add(proxyConnection);
       sourceConnections.add(connection);
-      logger.info("Підключення №%d відкрито!".formatted(i + 1));
+      logger.info("Підключення #%d відкрито!".formatted(i + 1));
     }
   }
 }

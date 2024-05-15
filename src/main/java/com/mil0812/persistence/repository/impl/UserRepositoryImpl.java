@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,7 +22,7 @@ public class UserRepositoryImpl extends GenericJdbcRepository<User>
     implements UserRepository {
 
   public UserRepositoryImpl(ConnectionManager connectionManager, UserRowMapper userRowMapper) {
-    super(connectionManager, userRowMapper, TableTitles.USER.getName());
+    super(connectionManager, userRowMapper, TableTitles.USERS.getName());
   }
 
   @Override
@@ -39,7 +41,7 @@ public class UserRepositoryImpl extends GenericJdbcRepository<User>
       values.put("lastName", user.lastName());
     }
     if (!user.email().isBlank()) {
-      values.put("lastName", user.email());
+      values.put("email", user.email());
     }
     if (Objects.nonNull(user.status())) {
       values.put("status", user.status());
@@ -55,5 +57,15 @@ public class UserRepositoryImpl extends GenericJdbcRepository<User>
   @Override
   public Optional<User> findByEmail(String email) {
     return findBy("email", email);
+  }
+
+  @Override
+  public Set<User> findAll() {
+    return super.findAll();
+  }
+
+  @Override
+  public Set<User> findAll(int offset, int limit) {
+    return super.findAll(offset, limit);
   }
 }

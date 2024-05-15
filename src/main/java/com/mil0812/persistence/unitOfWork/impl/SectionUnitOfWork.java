@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class SectionUnitOfWork extends GeneralUnitOfWork<Section> {
 
-  private final SectionRepository repository;
+  private final SectionRepository sectionRepository;
 
   protected SectionUnitOfWork(SectionRepository sectionRepository) {
     super(sectionRepository);
-    this.repository = sectionRepository;
+    this.sectionRepository = sectionRepository;
   }
 }

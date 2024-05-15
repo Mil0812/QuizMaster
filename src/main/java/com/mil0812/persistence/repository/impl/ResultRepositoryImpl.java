@@ -49,7 +49,7 @@ public class ResultRepositoryImpl extends GenericJdbcRepository<Result>
       values.put("user_id", result.userId());
     }
     if (Objects.nonNull(result.testId())) {
-      values.put("test_id", result.userId());
+      values.put("test_id", result.testId());
     }
     if (Objects.nonNull(result.sectionId())) {
       values.put("section_id", result.sectionId());

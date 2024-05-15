@@ -27,7 +27,7 @@ public class TestService {
   public TestService(PersistenceContext persistenceContext,
       AccessValidationService accessValidationService, Validator validator) {
     this.testUnitOfWork = persistenceContext.tests;
-    this.testRepository = persistenceContext.tests.repository;
+    this.testRepository = persistenceContext.tests.testRepository;
     this.accessValidationService = accessValidationService;
     this.validator = validator;
   }
@@ -73,6 +73,7 @@ public class TestService {
         null,
         testStoreDTO.userId(),
         testStoreDTO.typeId(),
+        testStoreDTO.sectionId(),
         testStoreDTO.title(),
         null,
         0,
@@ -100,6 +101,7 @@ public class TestService {
         null,
         testUpdateDTO.authorId(),
         testUpdateDTO.typeId(),
+        testUpdateDTO.sectionId(),
         testUpdateDTO.title(),
         testUpdateDTO.image(),
         testUpdateDTO.questionCount(),
@@ -117,7 +119,7 @@ public class TestService {
       throw new NoAccess("В Вас нема доступу до видалення даного тесту");
     }
 
-    return testUnitOfWork.repository.delete(test.id());
+    return testUnitOfWork.testRepository.delete(test.id());
   }
 
 }

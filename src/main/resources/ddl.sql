@@ -1,15 +1,15 @@
-DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS section_test;
+DROP TABLE IF EXISTS result;
+DROP TABLE IF EXISTS answer;
+DROP TABLE IF EXISTS question;
 DROP TABLE IF EXISTS section;
 DROP TABLE IF EXISTS test;
 DROP TABLE IF EXISTS test_type;
-DROP TABLE IF EXISTS question;
-DROP TABLE IF EXISTS answer;
-DROP TABLE IF EXISTS result;
-DROP TABLE IF EXISTS section_test;
+DROP TABLE IF EXISTS users;
 
----Табличка "Користувач"
----3 NF
-CREATE TABLE IF NOT EXISTS user
+--Табличка "Користувач"
+--3 NF
+CREATE TABLE users
 (
     id        UUID PRIMARY KEY,
     login     VARCHAR(20)  NOT NULL UNIQUE,
@@ -18,47 +18,23 @@ CREATE TABLE IF NOT EXISTS user
     lastName  VARCHAR(30)  NOT NULL,
     email     VARCHAR(111) NOT NULL UNIQUE,
     status    VARCHAR(7)   NOT NULL,
-    CHECK (status IN ('teacher', 'student')),
     CONSTRAINT users_login_key UNIQUE (login),
     CONSTRAINT users_email_key UNIQUE (email),
     CONSTRAINT users_login_min_length_check CHECK (LENGTH(login) >= 5)
 );
 
----Табличка "Розділ"
----2 NF
-CREATE TABLE IF NOT EXISTS section
+--Табличка "Розділ"
+--2 NF
+CREATE TABLE section
 (
     id   UUID PRIMARY KEY,
     name VARCHAR(30) NOT NULL,
     CONSTRAINT section_name_key UNIQUE (name)
 );
 
----Табличка "Тест"
----2 NF
-CREATE TABLE IF NOT EXISTS test
-(
-    id             UUID PRIMARY KEY,
-    section_id     id UUID     NOT NULL,
-    author_id      UUID        NULL,
-    type_id        UUID        NOT NULL,
-    title          VARCHAR(40) NOT NULL,
-    image          VARCHAR(30) NULL,
-    question_count INT         NULL,
-    CONSTRAINT tests_title_key UNIQUE (title),
-    CONSTRAINT tests_section_id_fk FOREIGN KEY (section_id) REFERENCES section (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT tests_author_id_fk FOREIGN KEY (author_id) REFERENCES user (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT tests_type_id_fk FOREIGN KEY (type_id) REFERENCES test_type (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
-
----Табличка "Тип тесту"
----2 NF
-CREATE TABLE IF NOT EXISTS test_type
+--Табличка "Тип тесту"
+--2 NF
+CREATE TABLE test_type
 (
     id                   UUID PRIMARY KEY,
     name                 VARCHAR(40)  NOT NULL,
@@ -71,10 +47,30 @@ CREATE TABLE IF NOT EXISTS test_type
     CONSTRAINT test_type_name_key UNIQUE (name)
 );
 
+--Табличка "Тест"
+--2 NF
+CREATE TABLE test
+(
+    id             UUID PRIMARY KEY,
+    author_id      UUID        NOT NULL,
+    type_id        UUID        NOT NULL,
+    section_id     UUID        NOT NULL,
+    title          VARCHAR(40) NOT NULL,
+    image          VARCHAR(30) NULL,
+    question_count INT         NULL,
+    CONSTRAINT test_title_key UNIQUE (title),
+    CONSTRAINT test_author_id_fk FOREIGN KEY (author_id) REFERENCES users (id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT test_type_id_fk FOREIGN KEY (type_id) REFERENCES test_type (id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
 
----Табличка "Питання"
----2 NF
-CREATE TABLE IF NOT EXISTS question
+
+--Табличка "Питання"
+--2 NF
+CREATE TABLE question
 (
     id            UUID PRIMARY KEY,
     question_text VARCHAR(100) NOT NULL,
@@ -84,9 +80,9 @@ CREATE TABLE IF NOT EXISTS question
         ON UPDATE CASCADE
 );
 
----Табличка "Відповідь"
----2 NF
-CREATE TABLE IF NOT EXISTS answer
+--Табличка "Відповідь"
+--2 NF
+CREATE TABLE answer
 (
     id          UUID PRIMARY KEY,
     question_id UUID        NOT NULL,
@@ -97,9 +93,9 @@ CREATE TABLE IF NOT EXISTS answer
         ON UPDATE CASCADE
 );
 
----Табличка "Результат"
----3 NF
-CREATE TABLE IF NOT EXISTS result
+--Табличка "Результат"
+--3 NF
+CREATE TABLE result
 (
     id           UUID PRIMARY KEY,
     user_id      UUID NOT NULL,
@@ -108,7 +104,7 @@ CREATE TABLE IF NOT EXISTS result
     grade        INT  NOT NULL,
     date_of_test TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT grade_between_1_and_100 CHECK (grade BETWEEN 1 AND 100),
-    CONSTRAINT result_user_id_fk FOREIGN KEY (user_id) REFERENCES user (id)
+    CONSTRAINT result_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     CONSTRAINT result_test_id_fk FOREIGN KEY (test_id) REFERENCES test (id)
@@ -119,7 +115,7 @@ CREATE TABLE IF NOT EXISTS result
         ON UPDATE CASCADE
 );
 
----Табличка "Тест-розділ" (багато до багатьох)
+--Табличка "Тест-розділ" (багато до багатьох)
 CREATE TABLE section_test
 (
     section_id UUID NOT NULL,

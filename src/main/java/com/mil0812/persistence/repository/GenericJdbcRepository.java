@@ -28,14 +28,18 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class GenericJdbcRepository<T extends Entity> implements Repository<T>{
+public abstract class GenericJdbcRepository<T extends Entity> implements Repository<T> {
+
   private final ConnectionManager connectionManager;
   private final RowMapper<T> rowMapper;
   private final String tableName;
+  final Logger logger = LoggerFactory.getLogger(GenericJdbcRepository.class);
 
   public GenericJdbcRepository(
-    ConnectionManager connectionManager, RowMapper<T> rowMapper, String tableName) {
+      ConnectionManager connectionManager, RowMapper<T> rowMapper, String tableName) {
     this.connectionManager = connectionManager;
     this.rowMapper = rowMapper;
     this.tableName = tableName;
@@ -220,7 +224,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
     String attributesString = String.join(", ", attributes);
     String placeholders =
         Stream.generate(() -> "?")
-            .limit(attributes.size() + 1)
+            .limit(attributes.size())
             .collect(Collectors.joining(", "));
     String sql =
         STR."""
@@ -249,6 +253,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
                              SET \{attributesString}
                            WHERE id = ?
                          """;
+    logger.info(STR."SQL-запит на оновлення: \{sql}");
 
     if (attributes.stream().anyMatch(a -> a.equals("date_of_test"))) {
       values.put("date_of_test", LocalDateTime.now());
@@ -262,6 +267,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
 
   private T updateExecute(Collection<Object> rawValues, String sql, String exceptionMessage) {
     List<Object> values = new ArrayList<>(rawValues);
+    logger.info(STR."Список значень: \{values}");
     try (Connection connection = connectionManager.get();
         PreparedStatement statement = connection.prepareStatement(sql)) {
       for (int i = 0; i < values.size(); i++) {
@@ -270,7 +276,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
       statement.executeUpdate();
       return findById((UUID) values.getLast()).orElseThrow();
     } catch (SQLException | NoSuchElementException e) {
-      throw new ErrorOnUpdate(exceptionMessage);
+      throw new ErrorOnUpdate(exceptionMessage + e.getMessage());
     }
   }
 
@@ -422,6 +428,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
           STR."Помилка при видаленні запису з таблиці по id: \{id.toString()}...");
     }
   }
+
   public boolean delete(Collection<UUID> uuid) {
     final String sql =
         STR."""
@@ -432,7 +439,7 @@ public abstract class GenericJdbcRepository<T extends Entity> implements Reposit
     try (Connection connection = connectionManager.get();
         PreparedStatement statement = connection.prepareStatement(sql)) {
 
-      for(var id: uuid) {
+      for (var id : uuid) {
         statement.setObject(1, id, Types.OTHER);
         statement.addBatch();
       }

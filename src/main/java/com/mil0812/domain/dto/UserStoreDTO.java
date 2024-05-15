@@ -25,7 +25,7 @@ public record UserStoreDTO(
     @Pattern(regexp = ".+@.+\\..+", message = "Емейл має відповідати формату")
     String email,
     @NotNull(message = "Статус користувача не має бути порожнім")
-    @Pattern(regexp = "teacher|student", message = "Оберіть статус з-поміж цих двох: student або teacher")
+    @Pattern(regexp = "teacher|student", message = "Оберіть статус з-поміж цих двох: студент або вчитель")
     User.Status status
 ) {
 

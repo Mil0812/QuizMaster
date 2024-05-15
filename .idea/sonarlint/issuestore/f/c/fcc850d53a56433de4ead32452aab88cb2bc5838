@@ -1,0 +1,6 @@
+
+o	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(ιγ‚Ψ
+f
+java:S1128"IRemove this unused import 'com.mil0812.persistence.entity.impl.TestType'.(ρω8›Ε©χ1
+g
+java:S1128"JRemove this unused import 'com.mil0812.persistence.repository.Repository'.(ΟπΉΉ8›Ε©χ1

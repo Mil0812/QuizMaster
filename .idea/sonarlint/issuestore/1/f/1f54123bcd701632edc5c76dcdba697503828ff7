@@ -1,0 +1,7 @@
+
+v	java:S116"URename this field "EMAIL_HOST" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(À“Ú‹øÿÿÿÿ8»™Û•÷1
+v	java:S116"URename this field "EMAIL_PORT" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(÷£…Àþÿÿÿÿ8¼™Û•÷1
+q	java:S116"URename this field "EMAIL_AUTH" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¶˜¨Ä8¼™Û•÷1
+u	java:S116"TRename this field "EMAIL_TLS" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Ç¿Çßÿÿÿÿÿ8¼™Û•÷1
+z	java:S116"YRename this field "EMAIL_USERNAME" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(³šö½øÿÿÿÿ8½™Û•÷1
+z	java:S116!"YRename this field "EMAIL_PASSWORD" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÄŸÆäþÿÿÿÿ8½™Û•÷1

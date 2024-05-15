@@ -23,13 +23,15 @@ public class TestRowMapper implements RowMapper<Test> {
   @Override
   public Test mapRow(ResultSet rs) throws SQLException {
     UUID id = UUID.fromString(rs.getString("id"));
-    UUID userId = UUID.fromString(rs.getString("user_id"));
-    UUID testTypeId = UUID.fromString(rs.getString("test_type_id"));
+    UUID userId = UUID.fromString(rs.getString("author_id"));
+    UUID testTypeId = UUID.fromString(rs.getString("type_id"));
+    UUID sectionId = UUID.fromString(rs.getString("section_id"));
     return new Test(
         id,
         userProxy,
         userId,
         testTypeId,
+        sectionId,
         rs.getString("title"),
         rs.getString("image"),
         rs.getInt("question_count"),

@@ -14,7 +14,7 @@ import com.mil0812.persistence.exception.ErrorOnUpdate;
 import com.mil0812.persistence.repository.impl.UserRepositoryImpl;
 import com.mil0812.persistence.repository.interfaces.UserRepository;
 import com.mil0812.persistence.repository.mappers.impl.UserRowMapper;
-import com.mil0812.persistense.init.H2DatabaseInitializer;
+import com.mil0812.persistense.init.FakeDatabaseInitializer;
 import java.sql.SQLException;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 public class UserRepositoryTest {
+
   private static ConnectionManager connectionManager;
   private static UserRepository userRepository;
 
@@ -44,7 +45,7 @@ public class UserRepositoryTest {
 
   @BeforeEach
   void init() throws SQLException {
-    H2DatabaseInitializer.run(connectionManager.get());
+    FakeDatabaseInitializer.run(connectionManager.get());
   }
 
   @Test
@@ -84,13 +85,13 @@ public class UserRepositoryTest {
     // Given
     User expectedUser = new User(
         UUID.fromString("93966090-3acc-41c2-a88c-1808fbcb60a1"),
-        "millenium",
+        "millennium",
         "Mmm7",
         "Міа",
         "Лейм",
         "mia-leim1@gmail.com",
         Status.STUDENT
-        );
+    );
 
     // When
     Optional<User> actualOptionalUser = userRepository.findBy("lastName", "Лейм");
@@ -117,7 +118,8 @@ public class UserRepositoryTest {
     Optional<User> actualOptionalUser = userRepository.findBy("lastName", "Фаст");
 
     // Then
-    assertTrue(actualOptionalUser.isEmpty(), "Порожнє значення: користувача з таким прізвищем не існує");
+    assertTrue(actualOptionalUser.isEmpty(),
+        "Порожнє значення: користувача з таким прізвищем не існує");
   }
 
   @Test
@@ -158,7 +160,8 @@ public class UserRepositoryTest {
     Optional<User> actualOptionalUser = userRepository.findByLogin("melory");
 
     // Then
-    assertTrue(actualOptionalUser.isEmpty(), "Порожнє значення: користувача з таким логіном не існує");
+    assertTrue(actualOptionalUser.isEmpty(),
+        "Порожнє значення: користувача з таким логіном не існує");
   }
 
   @Test
@@ -197,14 +200,15 @@ public class UserRepositoryTest {
     Optional<User> actualOptionalUser = userRepository.findByEmail("sunny@i.ua");
 
     // Then
-    assertTrue(actualOptionalUser.isEmpty(), "Порожнє значення: користувача з такою електронною адресою не існує");
+    assertTrue(actualOptionalUser.isEmpty(),
+        "Порожнє значення: користувача з такою електронною адресою не існує");
   }
 
   @Test
   @Tag("slow")
   void findAll_thenReturnsSetOfUser() {
     // Given
-    int usersSize = 3;
+    int usersSize = 4;
 
     // When
     Set<User> users = userRepository.findAll();
@@ -218,7 +222,7 @@ public class UserRepositoryTest {
   @Tag("slow")
   void count_thenReturnsCountOfRows() {
     // Given
-    int usersSize = 3;
+    int usersSize = 4;
 
     // When
     long count = userRepository.count();
@@ -233,7 +237,7 @@ public class UserRepositoryTest {
     // Given
     User expectedUser = new User(
         null,
-        "mike",
+        "mike89",
         "password000",
         "Майк",
         "Лейбренд",
@@ -254,6 +258,7 @@ public class UserRepositoryTest {
 
   @Test
   void save_whenInsertCollectionOfUsers_thenReturnsCollectionOfUsersWithGeneratedId() {
+
     // Given
     Set<User> users = new LinkedHashSet<>(3);
     users.add(new User(

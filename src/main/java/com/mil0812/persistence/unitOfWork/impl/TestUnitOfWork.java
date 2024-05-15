@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestUnitOfWork extends GeneralUnitOfWork<Test> {
 
-  public final TestRepository repository;
+  public final TestRepository testRepository;
 
   protected TestUnitOfWork(TestRepository testRepository) {
     super(testRepository);
-    this.repository = testRepository;
+    this.testRepository = testRepository;
   }
 }

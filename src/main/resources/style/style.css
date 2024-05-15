@@ -1,0 +1,50 @@
+.buttons {
+  -fx-background-color: #FFFFFF;
+  -fx-border-color: #b4190b;
+  -fx-border-radius: 5;
+  -fx-border-width: 3;
+  -fx-font-family: "Book Antiqua";
+  -fx-font-size: 23.0;
+  -fx-text-fill: #b4190b;
+  -fx-cursor: hand;
+}
+
+.buttons_inverted {
+  -fx-background-color: #b4190b;
+  -fx-border-color: #FFFFFF;
+  -fx-border-radius: 5;
+  -fx-border-width: 3;
+  -fx-font-family: "Book Antiqua";
+  -fx-font-size: 23.0;
+  -fx-text-fill: #FFFFFF;
+  -fx-cursor: hand;
+}
+
+.text_and_password_inputs {
+  -fx-background-color: #F7F9F9;
+  -fx-text-fill: #b4190b;
+  -fx-font-size: 17.0;
+  -fx-border-color: #b4190b;
+  -fx-border-radius: 5;
+  -fx-padding: 5;
+  -fx-pref-width: 260.0;
+  -fx-pref-height: 45.0;
+}
+
+.radio_button {
+  -fx-font-size: 13.0;
+  -fx-font-family: "Book Antiqua";
+  -fx-text-fill: #F7F9F9;
+}
+
+#roleComboBox {
+  -fx-font-size: 13.0;
+  -fx-font-family: "Book Antiqua";
+  -fx-text-fill: #F7F9F9;
+}
+
+#label {
+  -fx-font-family: "Book Antiqua";
+  -fx-font-size: 15.0;
+}
+

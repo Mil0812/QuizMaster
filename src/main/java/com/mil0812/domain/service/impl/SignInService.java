@@ -45,7 +45,7 @@ public class SignInService {
 
   public void logOut() {
     if (user == null) {
-      throw new UserAlreadyExists("Ви ще зареєстровані");
+      throw new UserAlreadyExists("Ви ще не зареєстровані");
     }
     user = null;
   }

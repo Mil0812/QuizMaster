@@ -1,0 +1,9 @@
+
+g	java:S112"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òιόÿÿÿÿ8†©—µυ1
+g	java:S112+"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òιόÿÿÿÿ8‡©—µυ1
+L
+java:S6829"*Add @Autowired to one of the constructors.(α ωÿÿÿÿ8ÒΈµυ1
+u
+java:S2139"XEither log this exception and handle it, or rethrow it with some contextual information.(ο­£Δ8α†¦µυ1
+u
+java:S2139)"XEither log this exception and handle it, or rethrow it with some contextual information.(ο­£Δ8΄ώ¦µυ1

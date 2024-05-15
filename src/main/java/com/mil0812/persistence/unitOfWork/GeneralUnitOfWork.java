@@ -27,8 +27,8 @@ public class GeneralUnitOfWork<T extends Entity> implements UnitOfWork<T> {
   private Set<T> entities;
 
   public GeneralUnitOfWork(Repository<T> repository) {
-    context = new HashMap<>();
     this.repository = repository;
+    context = new HashMap<>();
   }
 
   @Override

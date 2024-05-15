@@ -1,0 +1,12 @@
+
+g
+java:S1128"ERemove this unused import 'com.mil0812.persistence.entity.impl.Test'.(Ç·ï‚ÿÿÿÿÿ8 Äë›÷1
+{
+java:S1128"YRemove this unused import 'com.mil0812.persistence.repository.interfaces.TestRepository'.(õ°—çûÿÿÿÿ8¡Äë›÷1
+n
+java:S1128
+"QRemove this unused import 'com.mil0812.persistence.repository.mappers.RowMapper'.(õ” §8¡Äë›÷1
+M
+java:S1128"+Remove this unused import 'java.util.List'.(Õë±Äøÿÿÿÿ8¡Äë›÷1
+K
+java:S1128".Remove this unused import 'java.util.Objects'.(¼¸õ›8¡Äë›÷1

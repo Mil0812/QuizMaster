@@ -84,7 +84,6 @@ public class SectionRepositoryImpl extends GenericJdbcRepository<Section>
     if (!section.name().isBlank()) {
       values.put("name", section.name());
     }
-    values.put("name", section.name());
     return values;
   }
 }

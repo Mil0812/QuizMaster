@@ -13,18 +13,21 @@ public record Test(
     UserProxy user,
     UUID userId,
     UUID testTypeId,
+    UUID sectionId,
     String title,
     String image,
     int questionCount,
     Sections sections
 ) implements Entity, Comparable<Test> {
 
-  public Test(UUID id, UserProxy user, UUID userId, UUID testTypeId, String title, String image,
+  public Test(UUID id, UserProxy user, UUID userId, UUID testTypeId, UUID sectionId, String title,
+      String image,
       int questionCount, Sections sections) {
     this.id = id;
     this.user = user;
     this.userId = userId;
     this.testTypeId = testTypeId;
+    this.sectionId = sectionId;
     this.title = title;
     this.image = image;
     this.questionCount = questionCount;
@@ -64,6 +67,6 @@ public record Test(
 
   @Override
   public String toString() {
-    return STR."Test{id=\{id}, user=\{user}, userId=\{userId}, testTypeId=\{testTypeId}, title='\{title}\{'\''}, image='\{image}\{'\''}, questionCount=\{questionCount}, sections=\{sections}\{'}'}";
+    return STR."Test{id=\{id}, user=\{user}, userId=\{userId}, testTypeId=\{testTypeId}, sectionId=\{sectionId}, title='\{title}\{'\''}, image='\{image}\{'\''}, questionCount=\{questionCount}, sections=\{sections}\{'}'}";
   }
 }

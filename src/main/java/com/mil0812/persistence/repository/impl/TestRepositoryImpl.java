@@ -38,15 +38,18 @@ public class TestRepositoryImpl extends GenericJdbcRepository<Test>
     Map<String, Object> values = new LinkedHashMap<>();
 
     if (Objects.nonNull(test.userId())) {
-      values.put("user_id", test.userId());
+      values.put("author_id", test.userId());
     }
     if (Objects.nonNull(test.testTypeId())) {
       values.put("type_id", test.testTypeId());
     }
+    if (Objects.nonNull(test.sectionId())) {
+      values.put("section_id", test.sectionId());
+    }
     if (!test.title().isBlank()) {
       values.put("title", test.title());
     }
-    if (!test.image().isBlank()) {
+    if (!test.image().isEmpty()) {
       values.put("image", test.image());
     }
     values.put("question_count", test.questionCount());
@@ -76,7 +79,7 @@ public class TestRepositoryImpl extends GenericJdbcRepository<Test>
 
   @Override
   public Optional<Test> findByAuthor(UUID userId) {
-    return findBy("user", userId);
+    return findBy("author_id", userId);
   }
 
   @Override
@@ -86,7 +89,7 @@ public class TestRepositoryImpl extends GenericJdbcRepository<Test>
 
   @Override
   public Set<Test> findAllByAuthorId(UUID userId) {
-    return findAllWhere(STR."user_id = \{userId}");
+    return findAllWhere(STR."author_id = \{userId}");
   }
 
   @Override
